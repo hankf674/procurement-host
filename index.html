@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>价格分析系统（对接审批底表）</title>
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Microsoft YaHei', sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  min-height: 100vh;
+  padding: 20px;
+  color: #e2e8f0;
+  position: relative;
+}
+
+/* 右上角文字LOGO样式 */
+.logo-corner {
+  position: fixed;
+  top: 20px;
+  right: 25px;
+  z-index: 999;
+  font-size:24px;
+  font-weight:bold;
+  color:#38bdf8;
+  letter-spacing:2px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 25px;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.1);
+}
+
+.title {
+  color: #06b6d4;
+  margin-bottom: 25px;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.title i {
+  animation: glow 2s infinite alternate;
+}
+
+.section {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px dashed rgba(56, 189, 248, 0.2);
+}
+
+.section-title {
+  color: #38bdf8;
+  margin-bottom: 15px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-item {
+  flex: 1;
+  min-width: 200px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #aab3c7;
+}
+
+input,select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  background: rgba(2, 6, 23, 0.5);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 6px;
+  color: #e2e8f0;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+input:focus,select:focus {
+  border-color: #06b6d4;
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+}
+
+input::placeholder {
+  color: #64748b;
+}
+
+.supplier-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+
+.supplier-table th, .supplier-table td {
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  padding: 10px;
+  text-align: left;
+}
+
+.supplier-table th {
+  background: rgba(56, 189, 248, 0.1);
+  color: #06b6d4;
+  font-size: 14px;
+}
+
+.supplier-table td {
+  background: rgba(2, 6, 23, 0.3);
+  font-size: 14px;
+}
+
+/* 文件上传区域样式 */
+.file-area {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+.file-upload-btn {
+  padding: 5px 10px;
+  background: rgba(56, 189, 248, 0.2);
+  border: 1px dashed #38bdf8;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #e2e8f0;
+  transition: all 0.3s;
+}
+.file-upload-btn:hover {
+  background: rgba(56, 189, 248, 0.3);
+}
+.file-name {
+  font-size: 12px;
+  color: #a5f3fc;
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.file-clear-btn {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.file-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.btn {
+  background: linear-gradient(90deg, #059669, #06b6d4);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.5);
+}
+
+.btn-del {
+  background: linear-gradient(90deg, #dc2626, #ef4444);
+}
+
+.btn-export {
+  background: linear-gradient(90deg, #d97706, #f59e0b);
+}
+
+.report {
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  padding: 20px;
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.4);
+  min-height: 300px;
+  white-space: pre-wrap;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #cbd5e1;
+  position: relative;
+}
+
+.report::before {
+  content: '审批用价格分析报告';
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  background: #0f172a;
+  padding: 0 8px;
+  font-size: 12px;
+  color: #06b6d4;
+}
+
+.loading {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 5px #06b6d4; }
+  to { text-shadow: 0 0 15px #06b6d4; }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+</style>
+</head>
+<body>
+<!--右上角文字LOGO，等你发图片再替换成图片-->
+<div class="logo-corner">GOFO</div>
+
+<div class="container">
+  <h1 class="title"><i class="fas fa-file-invoice-dollar"></i> 价格分析系统（对接审批底表）</h1>
+
+  <div class="section">
+    <h2 class="section-title"><i class="fas fa-info-circle"></i> 项目基础信息</h2>
+    <div class="form-group">
+      <div class="form-item">
+        <label>项目名称</label>
+        <input type="text" id="projectName" placeholder="例如：2024年Q3办公设备采购">
+      </div>
+      <div class="form-item">
+        <label>采购部门</label>
+        <input type="text" id="dept" placeholder="例如：行政部">
+      </div>
+      <div class="form-item">
+        <label>采购方式</label>
+        <select id="buyType">
+          <option value="单一来源">单一来源</option>
+          <option value="询比（低于100万元）">询比（低于100万元）</option>
+          <option value="招标（高于100万元）">招标（高于100万元）</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>限价/预算价（元）</label>
+        <input type="number" id="excelTotal" placeholder="填写审批底表中的限价预算">
+      </div>
+      <div class="form-item">
+        <label>采购日期</label>
+        <input type="date" id="purchaseDate">
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title"><i class="fas fa-users"></i> 供应商报价信息</h2>
+    <button class="btn" onclick="addSupplier()"><i class="fas fa-plus"></i> 新增供应商</button>
+    <button class="btn btn-export" onclick="exportTableToExcel()"><i class="fas fa-file-excel"></i> 导出Excel</button>
+    <table class="supplier-table" id="supplierTable">
+      <thead>
+        <tr>
+          <th>供应商名称</th>
+          <th>第一次报价（元）</th>
+          <th>最终报价（元）</th>
+          <th>下调比例</th>
+          <th>联系人</th>
+          <th>联系电话</th>
+          <th>报价文件</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="text" class="sup-name" placeholder="供应商A"></td>
+          <td><input type="number" class="sup-first-price" placeholder="一次报价"></td>
+          <td><input type="number" class="sup-final-price" placeholder="最终报价"></td>
+          <td class="down-rate">-</td>
+          <td><input type="text" class="sup-contact" placeholder="联系人"></td>
+          <td><input type="text" class="sup-phone" placeholder="电话"></td>
+          <td>
+            <div class="file-area">
+              <input type="file" class="sup-file" onchange="showFileName(this)">
+              <div class="file-name"></div>
+            </div>
+          </td>
+          <td><button class="btn btn-del" onclick="delSupplier(this)"><i class="fas fa-trash"></i> 删除</button></td>
+        </tr>
+        <tr>
+          <td><input type="text" class="sup-name" placeholder="供应商B"></td>
+          <td><input type="number" class="sup-first-price" placeholder="一次报价"></td>
+          <td><input type="number" class="sup-final-price" placeholder="最终报价"></td>
+          <td class="down-rate">-</td>
+          <td><input type="text" class="sup-contact" placeholder="联系人"></td>
+          <td><input type="text" class="sup-phone" placeholder="电话"></td>
+          <td>
+            <div class="file-area">
+              <input type="file" class="sup-file" onchange="showFileName(this)">
+              <div class="file-name"></div>
+            </div>
+          </td>
+          <td><button class="btn btn-del" onclick="delSupplier(this)"><i class="fas fa-trash"></i> 删除</button></td>
+        </tr>
+        <tr>
+          <td><input type="text" class="sup-name" placeholder="供应商C"></td>
+          <td><input type="number" class="sup-first-price" placeholder="一次报价"></td>
+          <td><input type="number" class="sup-final-price" placeholder="最终报价"></td>
+          <td class="down-rate">-</td>
+          <td><input type="text" class="sup-contact" placeholder="联系人"></td>
+          <td><input type="text" class="sup-phone" placeholder="电话"></td>
+          <td>
+            <div class="file-area">
+              <input type="file" class="sup-file" onchange="showFileName(this)">
+              <div class="file-name"></div>
+            </div>
+          </td>
+          <td><button class="btn btn-del" onclick="delSupplier(this)"><i class="fas fa-trash"></i> 删除</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <button class="btn" onclick="generateReport()"><i class="fas fa-file-alt"></i> 生成价格分析报告</button>
+    <button class="btn" onclick="copyReport()" style="background: linear-gradient(90deg, #8b5cf6, #a78bfa)"><i class="fas fa-copy"></i> 复制报告</button>
+    <h2 class="section-title" style="margin-top: 20px;"><i class="fas fa-file-signature"></i> 审批用价格分析报告</h2>
+    <div class="report" id="reportContent">请点击【生成价格分析报告】按钮，自动生成审批用报告...</div>
+  </div>
+</div>
+
+<script>
+let finalReport = "";
+
+// 显示上传文件名 + 添加删除按钮
+function showFileName(input) {
+  const fileNameDiv = input.nextElementSibling;
+  if (input.files.length > 0) {
+    fileNameDiv.innerHTML = `
+      已上传：${input.files[0].name}
+      <button class="file-clear-btn" onclick="clearFile(this)">删除</button>
+    `;
+  } else {
+    fileNameDiv.innerHTML = "";
+  }
+}
+
+// 删除已上传的文件
+function clearFile(btn) {
+  const fileArea = btn.closest('.file-area');
+  const fileInput = fileArea.querySelector('.sup-file');
+  const fileNameDiv = fileArea.querySelector('.file-name');
+  
+  // 清空文件选择
+  fileInput.value = '';
+  fileNameDiv.innerHTML = '';
+}
+
+// 新增供应商行
+function addSupplier() {
+  const tableBody = document.querySelector('#supplierTable tbody');
+  const supCount = tableBody.children.length + 1;
+  const newRow = document.createElement('tr');
+  newRow.innerHTML = `
+    <td><input type="text" class="sup-name" placeholder="供应商${String.fromCharCode(64 + supCount)}"></td>
+    <td><input type="number" class="sup-first-price" placeholder="一次报价"></td>
+    <td><input type="number" class="sup-final-price" placeholder="最终报价"></td>
+    <td class="down-rate">-</td>
+    <td><input type="text" class="sup-contact" placeholder="联系人"></td>
+    <td><input type="text" class="sup-phone" placeholder="电话"></td>
+    <td>
+      <div class="file-area">
+        <input type="file" class="sup-file" onchange="showFileName(this)">
+        <div class="file-name"></div>
+      </div>
+    </td>
+    <td><button class="btn btn-del" onclick="delSupplier(this)"><i class="fas fa-trash"></i> 删除</button></td>
+  `;
+  tableBody.appendChild(newRow);
+}
+
+// 删除供应商行
+function delSupplier(btn) {
+  const row = btn.parentElement.parentElement;
+  row.remove();
+}
+
+// 计算下调比例
+function calculateDownRate(row) {
+  const firstPrice = Number(row.querySelector('.sup-first-price').value);
+  const finalPrice = Number(row.querySelector('.sup-final-price').value);
+  const rateCell = row.querySelector('.down-rate');
+  
+  if (isNaN(firstPrice) || firstPrice <= 0 || isNaN(finalPrice) || finalPrice < 0) {
+    rateCell.textContent = "-";
+    return 0;
+  }
+  
+  if (finalPrice > firstPrice) {
+    rateCell.textContent = "0%";
+    return 0;
+  }
+  
+  const rate = ((firstPrice - finalPrice) / firstPrice * 100).toFixed(2);
+  rateCell.textContent = `${rate}%`;
+  return rate;
+}
+
+// 采购方式说明
+function getBuyTypeDesc(type) {
+  switch(type){
+    case "单一来源":
+      return "本项目采用单一来源采购，经调研论证只能从指定唯一供应商处进行采购，无需多家比价；";
+    case "询比（低于100万元）":
+      return "本项目预算金额低于100万元，按照制度采用询比采购方式，征集多家供应商报价择优合作；";
+    case "招标（高于100万元）":
+      return "本项目预算金额高于100万元，按照制度采用招标采购方式，通过招标遴选合作单位；";
+    default:
+      return "";
+  }
+}
+
+// 生成报告
+function generateReport() {
+  const projectName = document.getElementById('projectName').value || "未填写项目名称";
+  const dept = document.getElementById('dept').value || "未填写采购部门";
+  const buyType = document.getElementById('buyType').value;
+  const buyDesc = getBuyTypeDesc(buyType);
+  const limitPrice = Number(document.getElementById('excelTotal').value);
+  const purchaseDate = document.getElementById('purchaseDate').value || "未选择日期";
+
+  const supRows = document.querySelectorAll('#supplierTable tbody tr');
+  const suppliers = [];
+  let hasError = false;
+
+  supRows.forEach((row, index) => {
+    const name = row.querySelector('.sup-name').value || `供应商${String.fromCharCode(65 + index)}`;
+    const firstPrice = Number(row.querySelector('.sup-first-price').value);
+    const finalPrice = Number(row.querySelector('.sup-final-price').value);
+    const contact = row.querySelector('.sup-contact').value || "未填写";
+    const phone = row.querySelector('.sup-phone').value || "未填写";
+    const fileInput = row.querySelector('.sup-file');
+    const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : "未上传";
+
+    if (isNaN(firstPrice) || firstPrice <= 0) {
+      alert(`请填写有效的第一次报价（${name}）！`);
+      hasError = true;
+      return;
+    }
+    if (isNaN(finalPrice) || finalPrice <= 0) {
+      alert(`请填写有效的最终报价（${name}）！`);
+      hasError = true;
+      return;
+    }
+    
+    const downRate = calculateDownRate(row);
+    suppliers.push({name,firstPrice,finalPrice,downRate,contact,phone,fileName});
+  });
+
+  if (hasError) return;
+  if (isNaN(limitPrice) || limitPrice <= 0) {
+    alert("请填写有效的限价/预算价！");
+    return;
+  }
+
+  const finalPrices = suppliers.map(s => s.finalPrice);
+  const minPrice = Math.min(...finalPrices);
+  const minSup = suppliers.find(s => s.finalPrice === minPrice);
+  const saveRate = ((limitPrice - minPrice) / limitPrice * 100).toFixed(2);
+
+  let report = `【${projectName} 价格分析报告】
+一、项目基础信息（对接审批底表）
+项目名称：${projectName}
+采购部门：${dept}
+采购方式：${buyType}
+采购方式说明：${buyDesc}
+采购日期：${purchaseDate}
+限价/预算价：${limitPrice} 元
+
+二、供应商详细信息
+`;
+
+  suppliers.forEach((sup, index) => {
+    report += `${index + 1}. ${sup.name}
+   第一次报价：${sup.firstPrice} 元
+   最终报价：${sup.finalPrice} 元
+   报价下调比例：${sup.downRate}%
+   联系人：${sup.contact}
+   联系电话：${sup.phone}
+   报价文件：${sup.fileName}
+   谈判结果：${sup.name}一次报价${sup.firstPrice}元，经谈判，二次报价${sup.finalPrice}元，报价下调比例${sup.downRate}%
+`;
+  });
+
+  report += `
+三、报价明细与分析
+📊 报价明细：
+采购方式：${buyType}
+${buyDesc}
+限价/预算价：${limitPrice} 元
+${suppliers.map(s => `${s.name}：一次报价${s.firstPrice}元，最终报价${s.finalPrice}元（下调${s.downRate}%），报价文件：${s.fileName}`).join('\n')}
+
+🎯 最低最终报价：${minPrice} 元（供应商：${minSup.name}）
+
+💡 分析建议：
+1、优先与报价最低的${minSup.name}洽谈合作，预计可降低采购成本 ${saveRate}%；
+2、结合交付周期、产品质量、售后服务、报价文件综合评估合作方；
+3、以本次最低价（${minPrice}元）作为后续议价依据，进一步压缩成本；
+4、建议留存本次报价数据及附件至采购台账，与审批底表联动存档，便于审批追溯；
+5、后续采购可参考本次比价结果，建立同类项目价格基准。
+
+四、审批建议
+建议选择 ${minSup.name} 作为合作供应商，报价符合成本控制要求，报价文件齐全，可提交审批流程。
+`;
+
+  const reportBox = document.getElementById('reportContent');
+  reportBox.innerText = '🔍 正在生成审批用报告，请稍候...';
+  reportBox.classList.add('loading');
+
+  setTimeout(() => {
+    reportBox.innerText = report;
+    reportBox.classList.remove('loading');
+    finalReport = report;
+  }, 1000);
+}
+
+// 复制报告
+function copyReport() {
+  if (!finalReport) {
+    alert("请先生成价格分析报告！");
+    return;
+  }
+  navigator.clipboard.writeText(finalReport).then(() => {
+    alert("✅ 审批用报告已复制到剪贴板，可直接粘贴至文档！");
+  }).catch(err => {
+    alert("❌ 复制失败，请手动复制报告内容！");
+  });
+}
+
+// 导出Excel
+function exportTableToExcel() {
+  const projectName = document.getElementById('projectName').value || "供应商报价表";
+  const fileName = `${projectName}-${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`;
+  const wb = XLSX.utils.book_new();
+  const tableData = [];
+  const headers = ['供应商名称', '第一次报价', '最终报价', '下调比例', '联系人', '联系电话', '报价文件'];
+  tableData.push(headers);
+
+  const supRows = document.querySelectorAll('#supplierTable tbody tr');
+  supRows.forEach(row => {
+    const rowData = [];
+    rowData.push(row.querySelector('.sup-name').value || '');
+    rowData.push(row.querySelector('.sup-first-price').value || '');
+    rowData.push(row.querySelector('.sup-final-price').value || '');
+    rowData.push(row.querySelector('.down-rate').textContent || '');
+    rowData.push(row.querySelector('.sup-contact').value || '');
+    rowData.push(row.querySelector('.sup-phone').value || '');
+    
+    const fileInput = row.querySelector('.sup-file');
+    const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : '未上传';
+    rowData.push(fileName);
+    
+    tableData.push(rowData);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(tableData);
+  XLSX.utils.book_append_sheet(wb, ws, "供应商报价信息");
+  XLSX.writeFile(wb, fileName);
+  alert(`✅ 供应商报价表已成功导出为：${fileName}`);
+}
+
+// 实时计算下调比例
+document.addEventListener('input', function(e) {
+  if (e.target.classList.contains('sup-first-price') || e.target.classList.contains('sup-final-price')) {
+    const row = e.target.closest('tr');
+    if (row) calculateDownRate(row);
+  }
+});
+
+// 加载Excel库
+(function loadSheetJS() {
+  const script = document.createElement('script');
+  script.src = 'https://cdn.bootcdn.net/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  script.onload = ()=>console.log('SheetJS加载完毕');
+  script.onerror = ()=>alert('Excel导出组件加载失败，刷新页面');
+  document.head.appendChild(script);
+})();
+</script>
+</body>
+</html>
